@@ -1,18 +1,19 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Container, AppBar, Typography, Grow, Grid } from "@material-ui/core";
-import { useDispatch } from "react-redux";
 
-import logo from "./images/Logo.png"
-import { getPosts } from "./actions/posts"
+// import ResponsiveAppBar from "./components/NavBar/NavBar";
+import {getPosts} from "./actions/posts"
 
 const App = () => {
-  const dispatch = useDispatch();
-  useEffect(() => {
-    dispatch(getPosts);
-  }, [dispatch]);
+  const [data, setData] = useState("")
+  
+  useEffect(()=> {
+    getPosts().then((data) => setData(data))
+  }, [])
   return (
     <Container>
-      <img src={logo} style={{ width: "100px" }} />
+      <button onClick={() => {console.log(data.message)}}></button>
+      
     </Container>
   );
 };

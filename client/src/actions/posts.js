@@ -1,6 +1,10 @@
 import * as api from '../api'
 
-const getPosts = () => async (dispatch) => {
-    const action = {type: 'FETCH_ALL', payload: []}
-    dispatch(action)
+export async function getPosts() {
+    try {
+        const { data } = await api.getPosts();
+        return data
+    } catch (error) {
+        console.log(error.message)
+    }
 }
