@@ -14,11 +14,12 @@ import MenuItem from "@mui/material/MenuItem";
 import { useNavigate } from "react-router-dom";
 
 import logo from "../images/Logo.png";
+import { logout } from "../actions/auth";
 
 const pages = ["Products", "Pricing", "Blog"];
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
-const NavBar = ({ user }) => {
+const NavBar = ({ user, setUser }) => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
@@ -38,6 +39,14 @@ const NavBar = ({ user }) => {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+  const settingPressed = (setting) => {
+    if (setting === "Logout"){
+      logout()
+      setUser(null)
+      navigate("/login")
+    }
+    
+  }
 
   return (
     <AppBar position="static">
@@ -99,6 +108,7 @@ const NavBar = ({ user }) => {
               </Button>
             ))}
           </Box>
+          <Typography>{user ? user.result.name : null}</Typography>
 
           <Box sx={{ flexGrow: 0 }}>
             {user ? (
@@ -136,7 +146,7 @@ const NavBar = ({ user }) => {
             >
               {settings.map((setting) => (
                 <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
+                  <Button onClick={() => settingPressed(setting)}>{setting}</Button>
                 </MenuItem>
               ))}
             </Menu>
