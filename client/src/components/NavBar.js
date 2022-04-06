@@ -11,7 +11,8 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import decode from "jwt-decode";
 
 import logo from "../images/Logo.png";
 import { logout } from "../actions/auth";
@@ -20,10 +21,31 @@ const pages = ["Products", "Pricing", "Blog"];
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
 const NavBar = ({ user, setUser }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  React.useEffect(() => {
+    const logUserout = () => {
+      logout();
+      setUser(null);
+      navigate("/login");
+    };
+
+    const token = user?.token;
+
+    if (token) {
+      const decodedToken = decode(token);
+
+      if (decodedToken.exp * 1000 < new Date().getTime()) logUserout();
+    }
+
+    setUser(JSON.parse(localStorage.getItem("profile")));
+  }, [location, setUser, user?.token, navigate]);
+
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
-  const navigate = useNavigate();
+  
+  
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -39,14 +61,15 @@ const NavBar = ({ user, setUser }) => {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+  
+
   const settingPressed = (setting) => {
-    if (setting === "Logout"){
-      logout()
-      setUser(null)
-      navigate("/login")
+    if (setting === "Logout") {
+      logout();
+      setUser(null);
+      navigate("/login");
     }
-    
-  }
+  };
 
   return (
     <AppBar position="static">
@@ -59,7 +82,6 @@ const NavBar = ({ user, setUser }) => {
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
-              color="inherit"
             >
               <MenuIcon />
             </IconButton>
@@ -114,7 +136,14 @@ const NavBar = ({ user, setUser }) => {
             {user ? (
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                  <Avatar
+                    alt="Remy Sharp"
+                    src={
+                      user
+                        ? user.result.imageUrl
+                        : "/static/images/avatar/2.jpg"
+                    }
+                  />
                 </IconButton>
               </Tooltip>
             ) : (
@@ -146,7 +175,9 @@ const NavBar = ({ user, setUser }) => {
             >
               {settings.map((setting) => (
                 <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Button onClick={() => settingPressed(setting)}>{setting}</Button>
+                  <Button onClick={() => settingPressed(setting)}>
+                    {setting}
+                  </Button>
                 </MenuItem>
               ))}
             </Menu>

@@ -1,6 +1,20 @@
-import axios from "axios"
+import axios from "axios";
 
-const url = "http://localhost:5000"
+const API = axios.create({ baseURL: "http://localhost:5000" });
 
-export const getPosts = () => axios.get(url + "/posts")
-export const authenticate = (result, token) => axios.post(url + "auth")
+API.interceptors.request.use((req) => {
+  if (localStorage.getItem("profile")) {
+    req.headers.authorization = `Bearer ${
+      JSON.parse(localStorage.getItem("profile")).token
+    }`;
+  }
+  return req;
+});
+
+// Authentication
+export const createAccount = (formData) =>
+  API.post("/auth/createAccount", formData);
+export const login = (formData) => API.post("/auth/login", formData);
+
+// Test
+export const getPosts = () => API.get("/posts");

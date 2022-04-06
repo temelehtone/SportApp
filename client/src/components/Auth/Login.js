@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -16,13 +16,11 @@ import { GoogleLogin } from "react-google-login";
 
 import Config from "../../config.json";
 import Icon from "./Icon";
-import { authenticate, googleAuth } from "../../actions/auth";
+import { authenticate, googleAuth, login } from "../../actions/auth";
 import { useNavigate } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
-
   
-
   root: {
     height: "100vh",
   },
@@ -54,23 +52,46 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Login = () => {
+const Login = ({ setUser, user }) => {
   const classes = useStyles();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  
+
+  const initialState = {
+    email: "",
+    password: "",
+  };
+  const [formData, setFormData] = useState(initialState);
+
+  const signIn = async (e) => {
+    e.preventDefault();
+    try {
+      await login(formData).then(setUser(localStorage.getItem("profile")));
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const googleSuccess = async (res) => {
-    const result = res?.profileObj
-    const token = res?.tokenId
+    const result = res?.profileObj;
+    const token = res?.tokenId;
     try {
-      googleAuth(result, token)
-      navigate("/")
+      googleAuth(result, token);
+      const profile = JSON.parse(localStorage.getItem("profile"));
+      if (profile) setUser(profile);
+      navigate("/");
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
   const googleFailure = () => {
-    console.log("Google Sign In failed")
-  }
+    console.log("Google Sign In failed");
+  };
 
   return (
     <Grid container component="main" className={classes.root}>
@@ -95,6 +116,7 @@ const Login = () => {
               name="email"
               autoComplete="email"
               autoFocus
+              onChange={handleChange}
             />
             <TextField
               variant="outlined"
@@ -106,18 +128,20 @@ const Login = () => {
               type="password"
               id="password"
               autoComplete="current-password"
+              onChange={handleChange}
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
               label="Remember me"
             />
-            
+
             <Button
               type="submit"
               fullWidth
               variant="contained"
               color="primary"
               className={classes.submit}
+              onClick={signIn}
             >
               Sign In
             </Button>
@@ -132,7 +156,9 @@ const Login = () => {
                   disabled={renderProps.disabled}
                   startIcon={<Icon />}
                   variant="contained"
-                >Google Sign in</Button>
+                >
+                  Google Sign in
+                </Button>
               )}
               onSuccess={googleSuccess}
               onFailure={googleFailure}

@@ -5,6 +5,6 @@ export async function getPosts() {
         const { data } = await api.getPosts();
         return data
     } catch (error) {
-        console.log(error.message)
+        console.log(error)
     }
 }
